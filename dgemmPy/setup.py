@@ -7,19 +7,33 @@ with open(path.join(path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()
 
 # see https://stackoverflow.com/questions/15527611/how-do-i-specify-different-compiler-flags-in-distutils-for-just-one-python-c-ext
+# see https://stackoverflow.com/questions/10034325/can-python-distutils-compile-cuda-code
+CUDA_HOME = "/usr/local/cuda"
 
 
 class build_ext_subclass(build_ext):
     def build_extensions(self):
+        # tell the compiler it can processes .cu
+        self.compiler.src_extensions.append('.cu')
         original__compile = self.compiler._compile
 
         def new__compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
             postargs = copy.deepcopy(extra_postargs)
+            if '.cu' in src:
+                # use the cuda for .cu files
+                self.compiler.set_executable('compiler_so', 'nvcc')
+                # use only a subset of the extra_postargs, which are 1-1
+                # translated from the extra_compile_args in the Extension class
+                postargs = postargs['nvcc']
+            else:
+                postargs = postargs['cxx']
+
             if 'avx2' in src:
                 postargs.append("-mavx2")
                 postargs.append("-mfma")
             if 'avx512' in src:
                 postargs.append("-mavx512f")
+
             return original__compile(obj, src, ext, cc_args, postargs, pp_opts)
 
         self.compiler._compile = new__compile
@@ -33,12 +47,21 @@ module = Extension('dgemmPy.src',
                    sources=['dgemmPy/src/wrapper.cpp',
                             'dgemmPy/src/dgemm.cpp',
                             'dgemmPy/src/dgemm_avx2.cpp',
-                            'dgemmPy/src/dgemm_avx512.cpp'],
-                   include_dirs=['dgemmPy/src', numpy.get_include()],
+                            'dgemmPy/src/dgemm_avx512.cpp',
+                            'dgemmPy/src/dgemm_cuda.cu'],
+                   include_dirs=['dgemmPy/src',
+                                 numpy.get_include(),
+                                 path.join(CUDA_HOME, 'include')],
+                   library_dirs=[path.join(CUDA_HOME, 'lib64')],
+                   runtime_library_dirs=[path.join(CUDA_HOME, 'lib64')],
                    language='c++',
-                   extra_compile_args=['-DCOL_MAJOR', "-Wall", "-O3",
-                                       '-fopenmp', '-std=c++11'],
-                   extra_link_args=['-lblas', '-lgomp'])
+                   extra_compile_args={'cxx': ['-DCOL_MAJOR', "-Wall", "-O3",
+                                               '-fopenmp', '-std=c++14'],
+                                       'nvcc': ['-arch=sm_61',
+                                                '--ptxas-options=-v', '-c',
+                                                '--compiler-options',
+                                                "'-fPIC'"]},
+                   extra_link_args=['-lblas', '-lgomp', '-lcublas', '-lcudart'])
 
 setup(name='dgemmPy',
       version='0.0.1',
@@ -62,3 +85,4 @@ setup(name='dgemmPy',
       ext_modules=[module],
       cmdclass={"build_ext": build_ext_subclass}
       )
+

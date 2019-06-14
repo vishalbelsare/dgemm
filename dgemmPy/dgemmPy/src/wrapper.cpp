@@ -182,6 +182,134 @@ static PyArrayObject* dgemm_C_loops_avx_tp(PyObject* self, PyObject* args) {
     return res;
 }
 
+static PyArrayObject* sgemm_cuda_loops(PyObject* self, PyObject* args) {
+    PyArrayObject* _matrix_a = nullptr;
+    PyArrayObject* _matrix_b = nullptr;
+    int repeats = 1;
+    if (!PyArg_ParseTuple(args, "O!O!|i:dgemm_C_loops", &PyArray_Type,
+                          &_matrix_a, &PyArray_Type, &_matrix_b, &repeats)) {
+        return 0;
+    }
+
+    double* matrix_a = (double*)PyArray_DATA(_matrix_a);
+    double* matrix_b = (double*)PyArray_DATA(_matrix_b);
+
+    npy_intp* dims_a = PyArray_DIMS(_matrix_a);
+    npy_intp* dims_b = PyArray_DIMS(_matrix_b);
+
+    int M = (int)dims_a[0];
+    int N = (int)dims_b[1];
+    int K = (int)dims_a[1];
+
+    npy_intp nRows = M;
+    npy_intp nCols = N;
+    npy_intp dims[2] = {nRows, nCols};
+    PyArrayObject* res = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+    double* res_ptr = (double*)PyArray_DATA(res);
+
+    NPY_BEGIN_ALLOW_THREADS
+    dgemm::sgemm_cuda_loops(matrix_a, matrix_b, res_ptr, M, K, N, repeats);
+    NPY_END_ALLOW_THREADS
+
+    return res;
+}
+
+static PyArrayObject* dgemm_cuda_loops(PyObject* self, PyObject* args) {
+    PyArrayObject* _matrix_a = nullptr;
+    PyArrayObject* _matrix_b = nullptr;
+    int repeats = 1;
+    if (!PyArg_ParseTuple(args, "O!O!|i:dgemm_C_loops", &PyArray_Type,
+                          &_matrix_a, &PyArray_Type, &_matrix_b, &repeats)) {
+        return 0;
+    }
+
+    double* matrix_a = (double*)PyArray_DATA(_matrix_a);
+    double* matrix_b = (double*)PyArray_DATA(_matrix_b);
+
+    npy_intp* dims_a = PyArray_DIMS(_matrix_a);
+    npy_intp* dims_b = PyArray_DIMS(_matrix_b);
+
+    int M = (int)dims_a[0];
+    int N = (int)dims_b[1];
+    int K = (int)dims_a[1];
+
+    npy_intp nRows = M;
+    npy_intp nCols = N;
+    npy_intp dims[2] = {nRows, nCols};
+    PyArrayObject* res = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+    double* res_ptr = (double*)PyArray_DATA(res);
+
+    NPY_BEGIN_ALLOW_THREADS
+    dgemm::dgemm_cuda_loops(matrix_a, matrix_b, res_ptr, M, K, N, repeats);
+    NPY_END_ALLOW_THREADS
+
+    return res;
+}
+
+static PyArrayObject* sgemm_cuda_cublas(PyObject* self, PyObject* args) {
+    PyArrayObject* _matrix_a = nullptr;
+    PyArrayObject* _matrix_b = nullptr;
+    int repeats = 1;
+    if (!PyArg_ParseTuple(args, "O!O!|i:dgemm_C_loops", &PyArray_Type,
+                          &_matrix_a, &PyArray_Type, &_matrix_b, &repeats)) {
+        return 0;
+    }
+
+    double* matrix_a = (double*)PyArray_DATA(_matrix_a);
+    double* matrix_b = (double*)PyArray_DATA(_matrix_b);
+
+    npy_intp* dims_a = PyArray_DIMS(_matrix_a);
+    npy_intp* dims_b = PyArray_DIMS(_matrix_b);
+
+    int M = (int)dims_a[0];
+    int N = (int)dims_b[1];
+    int K = (int)dims_a[1];
+
+    npy_intp nRows = M;
+    npy_intp nCols = N;
+    npy_intp dims[2] = {nRows, nCols};
+    PyArrayObject* res = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+    double* res_ptr = (double*)PyArray_DATA(res);
+
+    NPY_BEGIN_ALLOW_THREADS
+    dgemm::sgemm_cuda_cublas(matrix_a, matrix_b, res_ptr, M, K, N, repeats);
+    NPY_END_ALLOW_THREADS
+
+    return res;
+}
+
+static PyArrayObject* dgemm_cuda_cublas(PyObject* self, PyObject* args) {
+    PyArrayObject* _matrix_a = nullptr;
+    PyArrayObject* _matrix_b = nullptr;
+    int repeats = 1;
+    if (!PyArg_ParseTuple(args, "O!O!|i:dgemm_C_loops", &PyArray_Type,
+                          &_matrix_a, &PyArray_Type, &_matrix_b, &repeats)) {
+        return 0;
+    }
+
+    double* matrix_a = (double*)PyArray_DATA(_matrix_a);
+    double* matrix_b = (double*)PyArray_DATA(_matrix_b);
+
+    npy_intp* dims_a = PyArray_DIMS(_matrix_a);
+    npy_intp* dims_b = PyArray_DIMS(_matrix_b);
+
+    int M = (int)dims_a[0];
+    int N = (int)dims_b[1];
+    int K = (int)dims_a[1];
+
+    npy_intp nRows = M;
+    npy_intp nCols = N;
+    npy_intp dims[2] = {nRows, nCols};
+    PyArrayObject* res = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
+    double* res_ptr = (double*)PyArray_DATA(res);
+
+    NPY_BEGIN_ALLOW_THREADS
+    dgemm::dgemm_cuda_cublas(matrix_a, matrix_b, res_ptr, M, K, N, repeats);
+    NPY_END_ALLOW_THREADS
+
+    return res;
+}
+
 static PyMethodDef methods[] = {
     {"dgemm_C_loops", (PyCFunction)dgemm_C_loops, METH_VARARGS,
      "A function that performs a matrix multiplication using naive loops."},
@@ -196,6 +324,18 @@ static PyMethodDef methods[] = {
     {"dgemm_C_loops_avx_tp", (PyCFunction)dgemm_C_loops_avx_tp, METH_VARARGS,
      "A function that performs a matrix multiplication using naive loops using "
      "avx instructions and a threadpool parallelization."},
+    {"sgemm_cuda_loops", (PyCFunction)sgemm_cuda_loops, METH_VARARGS,
+     "A function that performs a matrix multiplication using a naive single "
+     "precision cuda kernel"},
+    {"dgemm_cuda_loops", (PyCFunction)dgemm_cuda_loops, METH_VARARGS,
+     "A function that performs a matrix multiplication using a naive double "
+     "precision cuda kernel"},
+    {"sgemm_cuda_cublas", (PyCFunction)sgemm_cuda_cublas, METH_VARARGS,
+     "A function that performs a matrix multiplication using the single "
+     "precision cublas function"},
+    {"dgemm_cuda_cublas", (PyCFunction)dgemm_cuda_cublas, METH_VARARGS,
+     "A function that performs a matrix multiplication using the double "
+     "precision cublas function"},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 

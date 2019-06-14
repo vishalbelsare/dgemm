@@ -122,6 +122,38 @@ void dgemm_C_loops_avx512_tp(double* aligned_a,
                              int K,
                              int N,
                              int repeats);
+
+void sgemm_cuda_loops(double* matrix_a,
+                      double* matrix_b,
+                      double* result,
+                      int M,
+                      int K,
+                      int N,
+                      int repeats);
+
+void dgemm_cuda_loops(double* matrix_a,
+                      double* matrix_b,
+                      double* result,
+                      int M,
+                      int K,
+                      int N,
+                      int repeats);
+
+void sgemm_cuda_cublas(double* matrix_a,
+                       double* matrix_b,
+                       double* result,
+                       int M,
+                       int K,
+                       int N,
+                       int repeats);
+
+void dgemm_cuda_cublas(double* matrix_a,
+                       double* matrix_b,
+                       double* result,
+                       int M,
+                       int K,
+                       int N,
+                       int repeats);
 }  // namespace dgemm
 
 #endif
