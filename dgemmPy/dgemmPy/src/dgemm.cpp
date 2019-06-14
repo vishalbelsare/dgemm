@@ -79,8 +79,7 @@ void dgemm::dgemm_C_loops_avx(double* matrix_a,
                               int M,
                               int K,
                               int N,
-                              int repeats,
-                              int parallelization) {
+                              int repeats) {
     int alignedDoubles, alignment, avxType;
 
     // check which avx type is supported by the cpu
@@ -133,27 +132,11 @@ void dgemm::dgemm_C_loops_avx(double* matrix_a,
     }
 
     if (avxType == avx2) {
-        if (parallelization == none) {
-            dgemm_C_loops_avx2(aligned_a, aligned_b, result, M, memory_K, N,
-                               repeats);
-        } else if (parallelization == openmp) {
-            dgemm_C_loops_avx2_omp(aligned_a, aligned_b, result, M, memory_K, N,
-                                   repeats);
-        } else {
-            dgemm_C_loops_avx2_tp(aligned_a, aligned_b, result, M, memory_K, N,
-                                  repeats);
-        }
+        dgemm_C_loops_avx2(aligned_a, aligned_b, result, M, memory_K, N,
+                           repeats);
     } else if (avxType == avx512) {
-        if (parallelization == none) {
-            dgemm_C_loops_avx512(aligned_a, aligned_b, result, M, memory_K, N,
-                                 repeats);
-        } else if (parallelization == openmp) {
-            dgemm_C_loops_avx512_omp(aligned_a, aligned_b, result, M, memory_K,
-                                     N, repeats);
-        } else {
-            dgemm_C_loops_avx512_tp(aligned_a, aligned_b, result, M, memory_K,
-                                    N, repeats);
-        }
+        dgemm_C_loops_avx512(aligned_a, aligned_b, result, M, memory_K, N,
+                             repeats);
     } else {
         // should never happen due to the return above!
     }

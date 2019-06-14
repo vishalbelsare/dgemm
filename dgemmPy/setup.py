@@ -36,9 +36,8 @@ module = Extension('dgemmPy.src',
                             'dgemmPy/src/dgemm_avx512.cpp'],
                    include_dirs=['dgemmPy/src', numpy.get_include()],
                    language='c++',
-                   extra_compile_args=['-DCOL_MAJOR', "-Wall", "-O3",
-                                       '-fopenmp', '-std=c++11'],
-                   extra_link_args=['-lblas', '-lgomp'])
+                   extra_compile_args=['-DCOL_MAJOR', "-Wall", "-O3"],
+                   extra_link_args=['-lblas'])
 
 setup(name='dgemmPy',
       version='0.0.1',
