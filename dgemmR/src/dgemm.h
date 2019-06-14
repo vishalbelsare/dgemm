@@ -19,13 +19,6 @@
 #define ALIGNED_ALLOC(alignment, size) _mm_malloc((size), (alignment))
 #define ALIGNED_FREE(ptr) _mm_free((ptr))
 
-// include multithreading, since apple does not support OpenMP, a parallel
-// library using C++11 threads is used as alternative
-#if defined _OPENMP
-#include <omp.h>
-#endif
-#include "Parallel.h"
-
 extern "C" {
 // forward declaration of the blas matrix multiplication since header can
 // be missing
@@ -48,8 +41,6 @@ extern void dgemm_(const char* transa,
 namespace dgemm {
 
 enum avxTypes { fallback, avx2, avx512 };
-enum mtTypes { none, openmp, stdThreads };
-
 void dgemm_C_loops(double* matrix_a,
                    double* matrix_b,
                    double* result,
@@ -72,8 +63,7 @@ void dgemm_C_loops_avx(double* matrix_a,
                        int M,
                        int K,
                        int N,
-                       int repeats,
-                       int parallelization);
+                       int repeats);
 
 void dgemm_C_loops_avx2(double* aligned_a,
                         double* aligned_b,
@@ -90,38 +80,6 @@ void dgemm_C_loops_avx512(double* aligned_a,
                           int K,
                           int N,
                           int repeats);
-
-void dgemm_C_loops_avx2_omp(double* aligned_a,
-                            double* aligned_b,
-                            double* aligned_c,
-                            int M,
-                            int K,
-                            int N,
-                            int repeats);
-
-void dgemm_C_loops_avx512_omp(double* aligned_a,
-                              double* aligned_b,
-                              double* aligned_c,
-                              int M,
-                              int K,
-                              int N,
-                              int repeats);
-
-void dgemm_C_loops_avx2_tp(double* aligned_a,
-                           double* aligned_b,
-                           double* aligned_c,
-                           int M,
-                           int K,
-                           int N,
-                           int repeats);
-
-void dgemm_C_loops_avx512_tp(double* aligned_a,
-                             double* aligned_b,
-                             double* aligned_c,
-                             int M,
-                             int K,
-                             int N,
-                             int repeats);
 }  // namespace dgemm
 
 #endif
