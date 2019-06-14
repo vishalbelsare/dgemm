@@ -139,9 +139,6 @@ void dgemm::dgemm_C_loops_avx(double* matrix_a,
         } else if (parallelization == openmp) {
             dgemm_C_loops_avx2_omp(aligned_a, aligned_b, result, M, memory_K, N,
                                    repeats);
-        } else {
-            dgemm_C_loops_avx2_tp(aligned_a, aligned_b, result, M, memory_K, N,
-                                  repeats);
         }
     } else if (avxType == avx512) {
         if (parallelization == none) {
@@ -150,9 +147,6 @@ void dgemm::dgemm_C_loops_avx(double* matrix_a,
         } else if (parallelization == openmp) {
             dgemm_C_loops_avx512_omp(aligned_a, aligned_b, result, M, memory_K,
                                      N, repeats);
-        } else {
-            dgemm_C_loops_avx512_tp(aligned_a, aligned_b, result, M, memory_K,
-                                    N, repeats);
         }
     } else {
         // should never happen due to the return above!
