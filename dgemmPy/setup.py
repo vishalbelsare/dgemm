@@ -1,44 +1,16 @@
-import copy
 import numpy
-from setuptools.command.build_ext import build_ext
 from setuptools import setup, Extension, find_packages
 from os import path
 with open(path.join(path.dirname(__file__), 'README.md')) as f:
     long_description = f.read()
 
-# see https://stackoverflow.com/questions/15527611/how-do-i-specify-different-compiler-flags-in-distutils-for-just-one-python-c-ext
-
-
-class build_ext_subclass(build_ext):
-    def build_extensions(self):
-        original__compile = self.compiler._compile
-
-        def new__compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
-            postargs = copy.deepcopy(extra_postargs)
-            if 'avx2' in src:
-                postargs.append("-mavx2")
-                postargs.append("-mfma")
-            if 'avx512' in src:
-                postargs.append("-mavx512f")
-            return original__compile(obj, src, ext, cc_args, postargs, pp_opts)
-
-        self.compiler._compile = new__compile
-        try:
-            build_ext.build_extensions(self)
-        finally:
-            del self.compiler._compile
-
-
 module = Extension('dgemmPy.src',
                    sources=['dgemmPy/src/wrapper.cpp',
-                            'dgemmPy/src/dgemm.cpp',
-                            'dgemmPy/src/dgemm_avx2.cpp',
-                            'dgemmPy/src/dgemm_avx512.cpp'],
+                            'dgemmPy/src/dgemm.cpp'],
                    include_dirs=['dgemmPy/src', numpy.get_include()],
                    language='c++',
-                   extra_compile_args=['-DCOL_MAJOR', "-Wall", "-O3",
-                                       '-fopenmp', '-std=c++11'],
-                   extra_link_args=['-lblas', '-lgomp'])
+                   extra_compile_args=['-DCOL_MAJOR', "-Wall", "-O3"],
+                   extra_link_args=['-lblas'])
 
 setup(name='dgemmPy',
       version='0.0.1',
@@ -59,6 +31,5 @@ setup(name='dgemmPy',
           "Programming Language :: Python :: 3",
           "Operating System :: OS Independent",
       ],
-      ext_modules=[module],
-      cmdclass={"build_ext": build_ext_subclass}
+      ext_modules=[module]
       )
