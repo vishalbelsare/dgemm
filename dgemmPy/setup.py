@@ -37,7 +37,7 @@ module = Extension('dgemmPy.src',
                    include_dirs=['dgemmPy/src', numpy.get_include()],
                    language='c++',
                    extra_compile_args=['-DCOL_MAJOR', "-Wall", "-O3",
-                                       '-fopenmp', '-std=c++11'],
+                                       '-fopenmp'],
                    extra_link_args=['-lblas', '-lgomp'])
 
 setup(name='dgemmPy',

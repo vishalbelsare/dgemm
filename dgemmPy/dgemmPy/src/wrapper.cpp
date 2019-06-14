@@ -149,39 +149,6 @@ static PyArrayObject* dgemm_C_loops_avx_omp(PyObject* self, PyObject* args) {
     return res;
 }
 
-static PyArrayObject* dgemm_C_loops_avx_tp(PyObject* self, PyObject* args) {
-    PyArrayObject* _matrix_a = nullptr;
-    PyArrayObject* _matrix_b = nullptr;
-    int repeats = 1;
-    if (!PyArg_ParseTuple(args, "O!O!|i:dgemm_C_loops", &PyArray_Type,
-                          &_matrix_a, &PyArray_Type, &_matrix_b, &repeats)) {
-        return 0;
-    }
-
-    double* matrix_a = (double*)PyArray_DATA(_matrix_a);
-    double* matrix_b = (double*)PyArray_DATA(_matrix_b);
-
-    npy_intp* dims_a = PyArray_DIMS(_matrix_a);
-    npy_intp* dims_b = PyArray_DIMS(_matrix_b);
-
-    int M = (int)dims_a[0];
-    int N = (int)dims_b[1];
-    int K = (int)dims_a[1];
-
-    npy_intp nRows = M;
-    npy_intp nCols = N;
-    npy_intp dims[2] = {nRows, nCols};
-    PyArrayObject* res = (PyArrayObject*)PyArray_ZEROS(2, dims, NPY_DOUBLE, 0);
-    double* res_ptr = (double*)PyArray_DATA(res);
-
-    NPY_BEGIN_ALLOW_THREADS
-    dgemm::dgemm_C_loops_avx(matrix_a, matrix_b, res_ptr, M, K, N, repeats,
-                             dgemm::mtTypes::stdThreads);
-    NPY_END_ALLOW_THREADS
-
-    return res;
-}
-
 static PyMethodDef methods[] = {
     {"dgemm_C_loops", (PyCFunction)dgemm_C_loops, METH_VARARGS,
      "A function that performs a matrix multiplication using naive loops."},
@@ -193,9 +160,6 @@ static PyMethodDef methods[] = {
     {"dgemm_C_loops_avx_omp", (PyCFunction)dgemm_C_loops_avx_omp, METH_VARARGS,
      "A function that performs a matrix multiplication using naive loops using "
      "avx instructions and openmp parallelization."},
-    {"dgemm_C_loops_avx_tp", (PyCFunction)dgemm_C_loops_avx_tp, METH_VARARGS,
-     "A function that performs a matrix multiplication using naive loops using "
-     "avx instructions and a threadpool parallelization."},
     {NULL, NULL, 0, NULL} /* Sentinel */
 };
 
