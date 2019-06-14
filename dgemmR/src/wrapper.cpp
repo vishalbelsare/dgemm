@@ -133,6 +133,98 @@ SEXP dgemm_C_loops_avx_tp(SEXP r_list) {
     return _result;
 }
 
+SEXP sgemm_cuda_loops(SEXP r_list) {
+    SEXP _matrix_a = getElementFromRList(r_list, "matrix_a");
+    SEXP _matrix_b = getElementFromRList(r_list, "matrix_b");
+
+    double* matrix_a = REAL(_matrix_a);
+    double* matrix_b = REAL(_matrix_b);
+
+    int M = INTEGER(GET_DIM(_matrix_a))[0];
+    int N = INTEGER(GET_DIM(_matrix_b))[1];
+    int K = INTEGER(GET_DIM(_matrix_a))[1];
+
+    SEXP _result;  // matrix with rows = norw_a and cols = N
+    PROTECT(_result = allocMatrix(REALSXP, M, N));
+    double* result = REAL(_result);
+
+    int repeats = INTEGER(getElementFromRList(r_list, "repeats"))[0];
+
+    dgemm::sgemm_cuda_loops(matrix_a, matrix_b, result, M, K, N, repeats);
+
+    UNPROTECT(1);
+    return _result;
+}
+
+SEXP dgemm_cuda_loops(SEXP r_list) {
+    SEXP _matrix_a = getElementFromRList(r_list, "matrix_a");
+    SEXP _matrix_b = getElementFromRList(r_list, "matrix_b");
+
+    double* matrix_a = REAL(_matrix_a);
+    double* matrix_b = REAL(_matrix_b);
+
+    int M = INTEGER(GET_DIM(_matrix_a))[0];
+    int N = INTEGER(GET_DIM(_matrix_b))[1];
+    int K = INTEGER(GET_DIM(_matrix_a))[1];
+
+    SEXP _result;  // matrix with rows = norw_a and cols = N
+    PROTECT(_result = allocMatrix(REALSXP, M, N));
+    double* result = REAL(_result);
+
+    int repeats = INTEGER(getElementFromRList(r_list, "repeats"))[0];
+
+    dgemm::dgemm_cuda_loops(matrix_a, matrix_b, result, M, K, N, repeats);
+
+    UNPROTECT(1);
+    return _result;
+}
+
+SEXP sgemm_cuda_cublas(SEXP r_list) {
+    SEXP _matrix_a = getElementFromRList(r_list, "matrix_a");
+    SEXP _matrix_b = getElementFromRList(r_list, "matrix_b");
+
+    double* matrix_a = REAL(_matrix_a);
+    double* matrix_b = REAL(_matrix_b);
+
+    int M = INTEGER(GET_DIM(_matrix_a))[0];
+    int N = INTEGER(GET_DIM(_matrix_b))[1];
+    int K = INTEGER(GET_DIM(_matrix_a))[1];
+
+    SEXP _result;  // matrix with rows = norw_a and cols = N
+    PROTECT(_result = allocMatrix(REALSXP, M, N));
+    double* result = REAL(_result);
+
+    int repeats = INTEGER(getElementFromRList(r_list, "repeats"))[0];
+
+    dgemm::sgemm_cuda_cublas(matrix_a, matrix_b, result, M, K, N, repeats);
+
+    UNPROTECT(1);
+    return _result;
+}
+
+SEXP dgemm_cuda_cublas(SEXP r_list) {
+    SEXP _matrix_a = getElementFromRList(r_list, "matrix_a");
+    SEXP _matrix_b = getElementFromRList(r_list, "matrix_b");
+
+    double* matrix_a = REAL(_matrix_a);
+    double* matrix_b = REAL(_matrix_b);
+
+    int M = INTEGER(GET_DIM(_matrix_a))[0];
+    int N = INTEGER(GET_DIM(_matrix_b))[1];
+    int K = INTEGER(GET_DIM(_matrix_a))[1];
+
+    SEXP _result;  // matrix with rows = norw_a and cols = N
+    PROTECT(_result = allocMatrix(REALSXP, M, N));
+    double* result = REAL(_result);
+
+    int repeats = INTEGER(getElementFromRList(r_list, "repeats"))[0];
+
+    dgemm::dgemm_cuda_cublas(matrix_a, matrix_b, result, M, K, N, repeats);
+
+    UNPROTECT(1);
+    return _result;
+}
+
 extern "C" {
 static const R_CallMethodDef callMethods[] = {
     {"_dgemm_C_loops", (DL_FUNC)&dgemm_C_loops, 1},
@@ -140,6 +232,10 @@ static const R_CallMethodDef callMethods[] = {
     {"_dgemm_C_loops_avx", (DL_FUNC)&dgemm_C_loops_avx, 1},
     {"_dgemm_C_loops_avx_omp", (DL_FUNC)&dgemm_C_loops_avx_omp, 1},
     {"_dgemm_C_loops_avx_tp", (DL_FUNC)&dgemm_C_loops_avx_tp, 1},
+    {"_sgemm_cuda_loops", (DL_FUNC)&sgemm_cuda_loops, 1},
+    {"_dgemm_cuda_loops", (DL_FUNC)&dgemm_cuda_loops, 1},
+    {"_sgemm_cuda_cublas", (DL_FUNC)&sgemm_cuda_cublas, 1},
+    {"_dgemm_cuda_cublas", (DL_FUNC)&dgemm_cuda_cublas, 1},
     {NULL, NULL, 0}};
 
 void R_init_dgemmR(DllInfo* info) {
